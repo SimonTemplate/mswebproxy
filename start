@@ -1,0 +1,50 @@
+#! /bin/bash
+
+#
+# start webproxy container
+#
+
+mode=${1}
+seq=${2:-1}
+shift $#
+
+datavol=proxy_${seq}
+
+function create_vol {
+    docker volume create ${datavol}
+}
+
+function start_cont {
+    if [[ ${1} == "setup" || ${1} == "debug" ]]; then
+        local it="-it"
+        local shell="/bin/bash"
+    fi
+
+    local extdir=${PWD}/intern
+    mkdir -p ${extdir}
+
+    local netwname=${DBCONT_NETWORK_NAME:-"bridge"}
+    local ipcmd=${DBCONT_NETWORK_IP}
+
+    docker run \
+        ${it} \
+        --privileged \
+        --mount type=volume,src=${datavol},dst=/etc/cert \
+        --mount type=bind,src=${extdir},dst=/extern \
+        --name "sp_proxy_${seq}" \
+        --network "${netwname}" \
+        --ip "${ipcmd}" \
+        --rm \
+        sp.webproxy:latest \
+        ${shell}
+}
+
+create_vol
+
+if [[ -n ${mode} ]]; then
+    echo "Setup mode"
+    start_cont ${mode}
+    echo "Container exited"
+else
+    start_cont &
+fi
