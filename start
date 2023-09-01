@@ -23,8 +23,8 @@ function start_cont {
     local extdir=${PWD}/intern
     mkdir -p ${extdir}
 
-    local netwname=${DBCONT_NETWORK_NAME:-"bridge"}
-    local ipcmd=${DBCONT_NETWORK_IP}
+    local netwname=${WEBPROXY_NETWORK_NAME:-"bridge"}
+    local ipcmd=${WEBPROXY_NETWORK_IP}
 
     docker run \
         ${it} \
